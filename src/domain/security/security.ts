@@ -25,11 +25,3 @@ export const validateInputType = (value: unknown, expectedType: string): boolean
   }
   return false;
 };
-
-export const preventInjection = (input: string): string => {
-  return input
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+\s*=/gi, '');
-};
-
