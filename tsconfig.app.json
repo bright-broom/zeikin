@@ -29,7 +29,7 @@
       "@/*": ["src/*"],
       "@features/*": ["src/features/*"],
       "@domain/*": ["src/domain/*"],
-      "@styles/*": ["src/styles/*"],
+      
       "@utils": ["src/utils"],
       "@constants": ["src/constants"],
       "@config": ["src/config"],

@@ -1,198 +1,95 @@
-import { useState, useCallback, useMemo, memo } from 'react';
-import { 
-  Box, 
-  useTheme, 
-  useMediaQuery,
-  Alert,
-  Snackbar
-} from '@mui/material';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTaxCalculation } from '../hooks/useTaxCalculation';
 import type { TaxCalculationResult } from '@domain/tax';
-import { TaxForm } from './TaxForm';
-import { EmployeeTaxResult } from './EmployeeTaxResult';
-import { EmployerTaxResult } from './EmployerTaxResult';
-import {
-  RootBox,
-  GradientBox,
-  StyledContainer,
-  ContentContainer,
-  ContentBox,
-  ResultGrid
-} from '@styles/shared.styles';
-import { HeaderTypography, ResultTitle } from '@styles/components/Typography.styles';
-import { StyledCard, StyledCardContent } from '@styles/components/Card.styles';
+import { validateSalary, safeMathOperation } from '@domain/validation';
 import { texts } from '@constants';
-import { validateSalary, validateBonus, safeMathOperation } from '@domain/validation';
-import type { TaxCalculationInput } from '@domain/tax';
+import { Conditions } from './Conditions';
+import type { ConditionInputs } from './Conditions';
+import { PaySlip } from './PaySlip';
+import { formatYen as yen } from '@utils';
+import type { Period } from './PaySlip';
+import { EmployerCost } from './EmployerCost';
 
-const MemoizedTaxForm = memo(TaxForm);
-const MemoizedEmployeeTaxResult = memo(EmployeeTaxResult);
-const MemoizedEmployerTaxResult = memo(EmployerTaxResult);
+// 初期値は「月給30万円・厚生年金に加入」。会社員のごく一般的な条件で、開いた瞬間に明細が見えるようにする
+const INITIAL: ConditionInputs = {
+  baseSalary: '30',
+  hasPension: true,
+  hasCareInsurance: false,
+  hasChildCare: false,
+};
 
 export const TaxCalculator = () => {
-  const [inputs, setInputs] = useState({
-    baseSalary: "30",
-    bonus: "",
-    hasPension: false,
-    hasCareInsurance: false,
-    hasChildCare: false,
-  });
+  const [inputs, setInputs] = useState<ConditionInputs>(INITIAL);
+  const [period, setPeriod] = useState<Period>('monthly');
+  // 入力が途中（空など）のあいだは、直前の結果を出したままにして画面が跳ねないようにする
+  const lastResult = useRef<TaxCalculationResult | null>(null);
+  // useTaxCalculation は描画のたびに新しい関数を返すので、最初の 1 つを使い続ける（再計算の連鎖を防ぐ）
+  const [{ calculate }] = useState(useTaxCalculation);
 
-  const [result, setResult] = useState<TaxCalculationResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const { calculate } = useTaxCalculation();
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-
-  const handleInputChange = useCallback((key: string, value: string | number | boolean) => {
-    if (typeof value === 'boolean') {
-      setInputs((prev) => ({
-        ...prev,
-        [key]: value,
-      }));
-      return;
-    }
-
-    const stringValue = value.toString();
-    
-    if (key === 'baseSalary') {
-      const validation = validateSalary(stringValue);
-      if (!validation.isValid && stringValue !== '') {
-        setError(validation.error || '無効な入力値です');
-        return;
-      }
-    } else if (key === 'bonus') {
-      const validation = validateBonus(stringValue);
-      if (!validation.isValid && stringValue !== '') {
-        setError(validation.error || '無効な入力値です');
-        return;
-      }
-    }
-
-    setInputs((prev) => ({
-      ...prev,
-      [key]: stringValue,
-    }));
-    setError(null);
-  }, []);
-
-  const handleCalculate = useCallback(() => {
-    setError(null);
-
-    const salaryValidation = validateSalary(inputs.baseSalary);
-    if (!salaryValidation.isValid) {
-      setError(salaryValidation.error || '月給の入力が無効です');
-      return;
-    }
-
-    const bonusValidation = validateBonus(inputs.bonus || '0');
-    if (!bonusValidation.isValid) {
-      setError(bonusValidation.error || 'ボーナスの入力が無効です');
-      return;
-    }
-
-    const numericInputs: TaxCalculationInput = {
-      baseSalary: salaryValidation.sanitizedValue || 0,
-      bonus: bonusValidation.sanitizedValue || 0,
-      hasPension: inputs.hasPension,
-      hasCareInsurance: inputs.hasCareInsurance,
-      hasChildCare: inputs.hasChildCare,
-    };
-
-    try {
-      const calculationResult = safeMathOperation(
-        () => calculate(numericInputs),
-        null,
-        '税金計算中にエラーが発生しました'
-      );
-
-      if (calculationResult === null) {
-        setError('計算中にエラーが発生しました。入力値を確認してください。');
-        return;
-      }
-
-      setResult(calculationResult);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '計算中に予期しないエラーが発生しました';
-      setError(errorMessage);
-      console.error('Tax calculation error:', err);
-    }
+  const computed = useMemo(() => {
+    const salary = validateSalary(inputs.baseSalary);
+    if (!salary.isValid || !salary.sanitizedValue) return { result: null, error: texts.errors.invalid };
+    const result = safeMathOperation(
+      () =>
+        calculate({
+          baseSalary: salary.sanitizedValue ?? 0,
+          // 賞与は計算側の扱いを見直すまで入力に出さない（README 参照）
+          bonus: 0,
+          hasPension: inputs.hasPension,
+          hasCareInsurance: inputs.hasCareInsurance,
+          hasChildCare: inputs.hasChildCare,
+        }),
+      null,
+      'tax calculation failed',
+    );
+    return result ? { result, error: null } : { result: null, error: texts.errors.invalid };
   }, [inputs, calculate]);
 
-  const handleCloseError = useCallback(() => {
-    setError(null);
+  if (computed.result) lastResult.current = computed.result;
+  const result = computed.result ?? lastResult.current;
+  // 空欄は打ち直しの途中なので、エラーとして責めない
+  const error = inputs.baseSalary === '' ? null : computed.error;
+
+  const handleSalaryChange = useCallback((value: string) => {
+    setInputs((prev) => ({ ...prev, baseSalary: value }));
   }, []);
 
-  const headerVariant = useMemo(() => {
-    if (isMobile) return "h6";
-    if (isTablet) return "h5";
-    return "h5";
-  }, [isMobile, isTablet]);
-  
-  const showError = useMemo(() => error !== null, [error]);
-  const showResult = useMemo(() => result !== null, [result]);
+  const handleToggle = useCallback((key: 'hasPension' | 'hasCareInsurance' | 'hasChildCare', value: boolean) => {
+    setInputs((prev) => ({ ...prev, [key]: value }));
+  }, []);
 
   return (
-    <RootBox>
-      <GradientBox>
-        <StyledContainer>
-          <HeaderTypography variant={headerVariant} component="h1">
-            {texts.app.title}
-          </HeaderTypography>
-        </StyledContainer>
-      </GradientBox>
+    <div className="page">
+      <header className="masthead">
+        <h1 className="masthead__name">{texts.app.title}</h1>
+        <p className="masthead__lead">{texts.app.lead}</p>
+      </header>
 
-      <ContentContainer>
-        <ContentBox>
-          <StyledCard>
-            <StyledCardContent>
-              <MemoizedTaxForm 
-                inputs={inputs} 
-                onChange={handleInputChange} 
-                onSubmit={handleCalculate} 
-              />
-            </StyledCardContent>
-          </StyledCard>
+      <div className="layout">
+        <Conditions inputs={inputs} error={error} onSalaryChange={handleSalaryChange} onToggle={handleToggle} />
 
-          <Snackbar
-            open={showError}
-            autoHideDuration={6000}
-            onClose={handleCloseError}
-            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          >
-            <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
-              {error}
-            </Alert>
-          </Snackbar>
-
-          {showResult && result && (
-            <ResultGrid>
-              <StyledCard>
-                <StyledCardContent>
-                  <ResultTitle variant="h5" gutterBottom>
-                    {texts.result.titles.employee}
-                  </ResultTitle>
-                  <Box sx={{ flex: 1, mt: { xs: 0.5, sm: 1 } }}>
-                    <MemoizedEmployeeTaxResult employee={result.employee} />
-                  </Box>
-                </StyledCardContent>
-              </StyledCard>
-              <StyledCard>
-                <StyledCardContent>
-                  <ResultTitle variant="h5" gutterBottom>
-                    {texts.result.titles.employer}
-                  </ResultTitle>
-                  <Box sx={{ flex: 1, mt: { xs: 0.5, sm: 1 } }}>
-                    <MemoizedEmployerTaxResult employer={result.employer} />
-                  </Box>
-                </StyledCardContent>
-              </StyledCard>
-            </ResultGrid>
+        <main>
+          {result && (
+            <>
+              <PaySlip result={result} period={period} onPeriodChange={setPeriod} />
+              <EmployerCost result={result} period={period} />
+            </>
           )}
-        </ContentBox>
-      </ContentContainer>
-    </RootBox>
+          <p className="disclaimer">{texts.disclaimer}</p>
+        </main>
+      </div>
+
+      {result && (
+        <div className="dock" aria-hidden="true">
+          <span>
+            {texts.dock.label}（{texts.slip.period[period]}）{' '}
+            <span className="dock__amount">{yen(result.employee.takeHome[period])}</span>円
+          </span>
+          <a href="#slip" tabIndex={-1}>
+            {texts.dock.jump}
+          </a>
+        </div>
+      )}
+    </div>
   );
 };

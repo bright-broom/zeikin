@@ -12,3 +12,6 @@ export const calculateTotal = (
     .filter((item): item is MonthlyAnnual => item !== undefined)
     .reduce((total, item) => total + item[key], 0);
 };
+
+// 明細の金額表示。1円未満は四捨五入し、3桁ごとに区切る
+export const formatYen = (amount: number): string => Math.round(amount).toLocaleString('ja-JP');

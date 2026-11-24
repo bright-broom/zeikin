@@ -29,8 +29,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
-          'mui-vendor': ['@mui/material', '@mui/icons-material'],
-          'emotion-vendor': ['@emotion/react', '@emotion/styled'],
         },
       },
     },
@@ -59,6 +57,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', '@mui/material', '@mui/icons-material'],
+    include: ['react', 'react-dom'],
   },
 })

@@ -111,7 +111,7 @@ feat(tax-calculator)：住民税計算ロジックの追加
 
 ### スタイリング
 
-- Material-UI のスタイリングシステムを使用してください。
+- 見た目は `src/styles/app.css` の CSS 変数とクラスを使ってください（UI ライブラリは使いません）。
 - コンポーネント固有のスタイルは `styles/components/` ディレクトリに配置してください。
 - 共通スタイルは `styles/shared/` ディレクトリに配置してください。
 - テーマ設定は `styles/theme/` ディレクトリに配置してください。
