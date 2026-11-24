@@ -1,5 +1,10 @@
 # 変更履歴
 
+## 2.0.1（2026-11-25）
+
+- 公開先を Vercel から Cloudflare Pages に移しました。URL は https://zeikin-tedori.pages.dev/ です
+- セキュリティ用のヘッダーを `vercel.json` から `public/_headers` に移しました
+
 ## 2.0.0（2026-11-25）
 
 ### 計算
