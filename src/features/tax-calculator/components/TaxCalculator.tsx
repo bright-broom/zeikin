@@ -1,60 +1,55 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useTaxCalculation } from '../hooks/useTaxCalculation';
+import { calculatePay, TAX_YEAR_LABEL } from '@domain/tax';
 import type { TaxCalculationResult } from '@domain/tax';
-import { validateSalary, safeMathOperation } from '@domain/validation';
 import { texts } from '@constants';
+import { formatYen as yen } from '@utils';
 import { Conditions } from './Conditions';
 import type { ConditionInputs } from './Conditions';
 import { PaySlip } from './PaySlip';
-import { formatYen as yen } from '@utils';
 import type { Period } from './PaySlip';
 import { EmployerCost } from './EmployerCost';
+import { Basis } from './Basis';
 
-// 初期値は「月給30万円・厚生年金に加入」。会社員のごく一般的な条件で、開いた瞬間に明細が見えるようにする
+const MAN = 10_000;
+const MAX_SALARY_MAN = 10_000; // 月1億円。これより上は入力の打ち間違いとみなす
+const MAX_BONUS_MAN = 100_000;
+
 const INITIAL: ConditionInputs = {
-  baseSalary: '30',
-  hasPension: true,
-  hasCareInsurance: false,
-  hasChildCare: false,
+  salary: '30',
+  bonus: '',
+  prefecture: '東京都',
+  hasSocialInsurance: true,
+  isCareInsured: false,
 };
 
 export const TaxCalculator = () => {
   const [inputs, setInputs] = useState<ConditionInputs>(INITIAL);
   const [period, setPeriod] = useState<Period>('monthly');
-  // 入力が途中（空など）のあいだは、直前の結果を出したままにして画面が跳ねないようにする
+  // 入力の途中（空欄など）のあいだは、直前の結果を出したままにして画面が跳ねないようにする
   const lastResult = useRef<TaxCalculationResult | null>(null);
-  // useTaxCalculation は描画のたびに新しい関数を返すので、最初の 1 つを使い続ける（再計算の連鎖を防ぐ）
-  const [{ calculate }] = useState(useTaxCalculation);
 
   const computed = useMemo(() => {
-    const salary = validateSalary(inputs.baseSalary);
-    if (!salary.isValid || !salary.sanitizedValue) return { result: null, error: texts.errors.invalid };
-    const result = safeMathOperation(
-      () =>
-        calculate({
-          baseSalary: salary.sanitizedValue ?? 0,
-          // 賞与は計算側の扱いを見直すまで入力に出さない（README 参照）
-          bonus: 0,
-          hasPension: inputs.hasPension,
-          hasCareInsurance: inputs.hasCareInsurance,
-          hasChildCare: inputs.hasChildCare,
-        }),
-      null,
-      'tax calculation failed',
-    );
-    return result ? { result, error: null } : { result: null, error: texts.errors.invalid };
-  }, [inputs, calculate]);
+    const salary = Number(inputs.salary);
+    if (!inputs.salary || !Number.isInteger(salary) || salary < 1 || salary > MAX_SALARY_MAN) {
+      return { result: null, error: texts.errors.salary };
+    }
+    const bonus = Math.min(Number(inputs.bonus) || 0, MAX_BONUS_MAN);
+    const result = calculatePay({
+      monthlySalary: salary * MAN,
+      annualBonus: bonus * MAN,
+      prefecture: inputs.prefecture,
+      hasSocialInsurance: inputs.hasSocialInsurance,
+      isCareInsured: inputs.isCareInsured,
+    });
+    return { result, error: null };
+  }, [inputs]);
 
   if (computed.result) lastResult.current = computed.result;
   const result = computed.result ?? lastResult.current;
   // 空欄は打ち直しの途中なので、エラーとして責めない
-  const error = inputs.baseSalary === '' ? null : computed.error;
+  const salaryError = inputs.salary === '' ? null : computed.error;
 
-  const handleSalaryChange = useCallback((value: string) => {
-    setInputs((prev) => ({ ...prev, baseSalary: value }));
-  }, []);
-
-  const handleToggle = useCallback((key: 'hasPension' | 'hasCareInsurance' | 'hasChildCare', value: boolean) => {
+  const handleChange = useCallback(<K extends keyof ConditionInputs>(key: K, value: ConditionInputs[K]) => {
     setInputs((prev) => ({ ...prev, [key]: value }));
   }, []);
 
@@ -63,19 +58,20 @@ export const TaxCalculator = () => {
       <header className="masthead">
         <h1 className="masthead__name">{texts.app.title}</h1>
         <p className="masthead__lead">{texts.app.lead}</p>
+        <p className="masthead__year">{TAX_YEAR_LABEL}の税率・保険料率</p>
       </header>
 
       <div className="layout">
-        <Conditions inputs={inputs} error={error} onSalaryChange={handleSalaryChange} onToggle={handleToggle} />
+        <Conditions inputs={inputs} salaryError={salaryError} onChange={handleChange} />
 
-        <main>
+        <main className="results">
           {result && (
             <>
               <PaySlip result={result} period={period} onPeriodChange={setPeriod} />
               <EmployerCost result={result} period={period} />
+              <Basis result={result} prefecture={inputs.prefecture} />
             </>
           )}
-          <p className="disclaimer">{texts.disclaimer}</p>
         </main>
       </div>
 

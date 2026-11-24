@@ -1,40 +1,38 @@
 /*
- * ZEIKIN の見た目。モチーフは日本の会社員が毎月受け取る「給与明細」。
- * 机（背景）の上に紙の明細が 1 枚載っている、という 1 つの絵だけを強く見せ、ほかは静かにする。
- * 書体は帳票向けに作られた BIZ UDPゴシック。日本語は端末の標準（Windows は同書体、Mac はヒラギノ）に任せ、
- * 英数字だけ同梱して、金額の見た目をどの端末でもそろえる。数字は等幅（tabular-nums）で桁を縦にそろえる。
+ * ZEIKIN の見た目。題材は会社員が毎月受け取る給与明細。
+ * 机（背景）の上に紙の明細が載っている、という絵だけを強く見せ、ほかは控えめにする。
+ * 書体は BIZ UDPゴシック。日本語は端末の標準（Windows は同書体、Mac はヒラギノ）に任せ、
+ * 英数字だけ同梱して金額の見た目をそろえる。数字は tabular-nums で桁を縦にそろえる。
  */
 
 :root {
-  /* 色：机・紙・罫線・墨と、内訳の 3 色（手取り＝藍、税＝朱、社会保険＝黄土）＋会社負担＝青竹 */
+  /* 机・紙・罫線・墨と、内訳の 3 色（手取り＝藍、税＝朱、社会保険＝黄土）、会社負担＝青竹 */
   --desk: #e6ecf1;
   --paper: #ffffff;
   --rule: #b9c5cf;
   --rule-faint: #dfe6ec;
   --ink: #17202b;
   --ink-soft: #4d5a68;
-  --ink-faint: #6f7c89;
+  --ink-faint: #66727f;
   --ai: #1f3f73;
   --ai-tint: #e8eef7;
   --shu: #c2412d;
-  --ocher: #b07f1f;
+  --ocher: #a87818;
   --aotake: #2f6f62;
   --aotake-tint: #e6f1ee;
-  --focus: #1f3f73;
 
   --font-text: 'BIZ UDPGothic', 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP', 'Noto Sans CJK JP', system-ui, sans-serif;
   --font-num: 'BIZ UDPGothic', 'Hiragino Sans', system-ui, sans-serif;
 
-  /* 文字の段階（1.25 倍の比） */
+  /* 文字の段階（1.25 倍） */
   --fs-xs: 0.8rem;
   --fs-s: 0.875rem;
   --fs-m: 1rem;
   --fs-l: 1.25rem;
   --fs-xl: 1.563rem;
-  --fs-hero: clamp(2.6rem, 7vw, 3.8rem);
+  --fs-hero: clamp(2.6rem, 6vw, 4rem);
 
-  --gap: 1rem;
-  --radius: 2px; /* 帳票は角を落とさない。ほぼ直角にする */
+  --radius: 2px; /* 帳票なので角はほぼ直角 */
 }
 
 *,
@@ -54,39 +52,33 @@ body {
   font-family: var(--font-text);
   font-size: var(--fs-m);
   line-height: 1.7;
-  font-feature-settings: 'palt' 0;
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
   color: inherit;
 }
 
 :focus-visible {
-  outline: 3px solid var(--focus);
+  outline: 3px solid var(--ai);
   outline-offset: 2px;
+}
+
+a {
+  color: var(--ai);
 }
 
 .num {
   font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
-/* ───────── 全体の枠 ───────── */
+/* ───────── 全体 ───────── */
 
 .page {
-  max-width: 1120px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 1.5rem 1rem 6rem;
 }
@@ -95,9 +87,9 @@ input {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.25rem 1rem;
-  padding-bottom: 1.25rem;
-  margin-bottom: 1.5rem;
+  gap: 0.25rem 1.25rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.75rem;
   border-bottom: 2px solid var(--ink);
 }
 
@@ -115,20 +107,47 @@ input {
   font-size: var(--fs-s);
 }
 
+.masthead__year {
+  margin: 0 0 0 auto;
+  color: var(--ink-faint);
+  font-size: var(--fs-xs);
+}
+
 .layout {
   display: grid;
+  gap: 2rem;
+}
+
+.results {
+  display: grid;
   gap: 1.5rem;
+  align-content: start;
+  min-width: 0;
 }
 
 @media (min-width: 960px) {
-  .layout {
-    grid-template-columns: 340px minmax(0, 1fr);
-    align-items: start;
-    gap: 2.5rem;
+  .page {
+    padding: 2.5rem 2rem 4rem;
   }
+  .layout {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 3rem;
+  }
+  /* 条件は画面に貼り付けておき、右の明細だけをスクロールして読む */
   .conditions {
     position: sticky;
     top: 1.5rem;
+    align-self: start;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding-right: 0.25rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .layout {
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 4rem;
   }
 }
 
@@ -137,57 +156,81 @@ input {
 .conditions {
   display: grid;
   gap: 1.75rem;
+  align-content: start;
+}
+
+.field {
+  min-width: 0;
 }
 
 .field__label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
+  padding: 0;
   font-weight: 700;
 }
 
-.salary {
+.amount {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  padding: 0.25rem 0 0.5rem;
-  border-bottom: 2px solid var(--ink);
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--ink);
 }
 
-.salary:focus-within {
+.amount:focus-within {
   border-bottom-color: var(--ai);
+  box-shadow: 0 1px 0 var(--ai);
 }
 
-.salary__input {
+.amount__input {
   width: 100%;
   min-width: 0;
+  padding: 0;
   border: 0;
   background: transparent;
   font-family: var(--font-num);
-  font-size: 2.75rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.2;
   text-align: right;
-  padding: 0;
 }
 
-.salary__input:focus-visible {
+.amount__input::placeholder {
+  color: var(--rule);
+}
+
+.amount__input:focus-visible {
   outline: none;
 }
 
-.salary__unit {
+.amount--large {
+  border-bottom-width: 2px;
+}
+
+.amount--large .amount__input {
+  font-size: 2.75rem;
+  line-height: 1.1;
+}
+
+.amount__unit {
   flex: none;
-  font-size: var(--fs-l);
   font-weight: 700;
 }
 
+.amount--large .amount__unit {
+  font-size: var(--fs-l);
+}
+
 .field__hint {
-  margin: 0.5rem 0 0;
+  margin: 0.4rem 0 0;
   color: var(--ink-faint);
-  font-size: var(--fs-s);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
 }
 
 .field__error {
-  margin: 0.5rem 0 0;
+  margin: 0.4rem 0 0;
   color: var(--shu);
   font-size: var(--fs-s);
   font-weight: 700;
@@ -195,24 +238,24 @@ input {
 
 .slider {
   width: 100%;
-  margin: 1rem 0 0.25rem;
-  accent-color: var(--ai);
   height: 2rem;
+  margin: 0.75rem 0 0;
+  accent-color: var(--ai);
 }
 
 .presets {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0.75rem 0 0;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
   padding: 0;
   list-style: none;
 }
 
 .preset {
-  min-width: 3.5rem;
-  min-height: 2.75rem;
-  padding: 0 0.75rem;
+  min-width: 3.4rem;
+  min-height: 2.5rem;
+  padding: 0 0.6rem;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--paper);
@@ -231,16 +274,29 @@ input {
   color: #fff;
 }
 
+.select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 2.25rem 0 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background:
+    var(--paper)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2317202b' stroke-width='1.6'/%3E%3C/svg%3E")
+    no-repeat right 0.75rem center;
+  appearance: none;
+  cursor: pointer;
+}
+
+.select:hover {
+  border-color: var(--ink);
+}
+
 .options {
   margin: 0;
   padding: 0;
   border: 0;
-}
-
-.options legend {
-  padding: 0;
-  margin-bottom: 0.25rem;
-  font-weight: 700;
+  min-width: 0;
 }
 
 .option {
@@ -248,7 +304,7 @@ input {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 0 1rem;
-  padding: 0.85rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid var(--rule-faint);
   cursor: pointer;
 }
@@ -264,11 +320,11 @@ input {
 .option__note {
   grid-column: 1;
   color: var(--ink-faint);
-  font-size: var(--fs-s);
+  font-size: var(--fs-xs);
   line-height: 1.5;
 }
 
-/* チェックボックスをスイッチの形にする（中身は本物の checkbox のまま） */
+/* チェックボックスをスイッチの形にする（中身は本物の checkbox） */
 .switch {
   grid-row: 1 / span 2;
   grid-column: 2;
@@ -309,22 +365,18 @@ input {
 /* ───────── 給与明細（右） ───────── */
 
 .slip {
-  position: relative;
   background: var(--paper);
   border: 1px solid var(--rule);
-  /* 机の上に紙が 1 枚載っている。この画面で影を使うのはここだけ */
-  box-shadow:
-    0 1px 0 var(--rule-faint),
-    0 18px 40px -24px rgba(23, 32, 43, 0.35);
+  /* この画面で影を付けるのは明細の紙だけ */
+  box-shadow: 0 18px 40px -24px rgba(23, 32, 43, 0.35);
 }
 
 .slip__head {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 1rem 1.25rem;
+  padding: 0.9rem 1.25rem;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -333,12 +385,6 @@ input {
   font-size: var(--fs-l);
   font-weight: 700;
   letter-spacing: 0.3em;
-}
-
-.slip__basis {
-  margin: 0;
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
 }
 
 .period {
@@ -400,7 +446,7 @@ input {
   font-size: var(--fs-s);
 }
 
-/* 手取り率の印。朱の丸印は明細の「検印」に見立てたもの */
+/* 手取り率の丸印（明細の検印に見立てたもの） */
 .seal {
   display: grid;
   place-content: center;
@@ -410,8 +456,8 @@ input {
   border-radius: 50%;
   color: var(--shu);
   text-align: center;
-  transform: rotate(-8deg);
   line-height: 1.2;
+  transform: rotate(-8deg);
 }
 
 .seal__label {
@@ -426,7 +472,7 @@ input {
   font-weight: 700;
 }
 
-/* 内訳の帯：額面 100% を手取り・税・社会保険に分けて見せる */
+/* 額面を手取り・税・社会保険に分けた帯 */
 .split {
   padding: 0 1.25rem 1.25rem;
 }
@@ -469,7 +515,7 @@ input {
   font-size: var(--fs-xs);
 }
 
-/* 支給・控除の表。紙の明細の罫線を再現する */
+/* 支給・控除の表 */
 .ledger {
   display: grid;
   border-top: 2px solid var(--ink);
@@ -491,7 +537,7 @@ input {
 
 .ledger__caption {
   margin: 0;
-  padding: 0.5rem 1.25rem;
+  padding: 0.45rem 1.25rem;
   border-bottom: 1px solid var(--rule);
   background: var(--ai-tint);
   font-size: var(--fs-s);
@@ -500,15 +546,19 @@ input {
 }
 
 .ledger__rows {
-  margin: 0;
   flex: 1;
+  margin: 0;
+}
+
+.ledger__rows--total {
+  flex: none;
 }
 
 .row {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.6rem 1.25rem;
+  padding: 0.55rem 1.25rem;
   border-bottom: 1px solid var(--rule-faint);
 }
 
@@ -518,6 +568,7 @@ input {
 
 .row dd {
   margin: 0;
+  text-align: right;
 }
 
 .row--group dt {
@@ -528,6 +579,7 @@ input {
 
 .row--group dt::before {
   content: '';
+  flex: none;
   width: 0.5rem;
   height: 0.5rem;
   background: var(--c);
@@ -543,7 +595,7 @@ input {
   color: var(--ink);
 }
 
-/* 明細の最終行。実物の給与明細と同じく、手取りを「総支給額 − 控除合計」の式で締める */
+/* 明細の最終行。手取りを「総支給額 − 控除合計」の式で締める */
 .slip__foot {
   display: flex;
   flex-wrap: wrap;
@@ -565,9 +617,9 @@ input {
   font-size: var(--fs-m);
 }
 
-/* 会社の負担 */
+/* ───────── 会社の負担 ───────── */
+
 .employer {
-  margin-top: 1.5rem;
   padding: 1.25rem;
   background: var(--paper);
   border: 1px solid var(--rule);
@@ -613,7 +665,6 @@ input {
 .equation__op {
   padding-bottom: 0.2rem;
   color: var(--ink-faint);
-  font-family: var(--font-num);
   font-size: var(--fs-l);
 }
 
@@ -622,19 +673,92 @@ input {
   font-size: var(--fs-xl);
 }
 
-.employer .row {
+.employer .row,
+.basis .row {
   padding-left: 0;
   padding-right: 0;
 }
 
-.disclaimer {
-  margin: 1.5rem 0 0;
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
-  line-height: 1.6;
+/* 会社の負担は、明細と並べて読めるよう広い画面では 2 列にする */
+@media (min-width: 1280px) {
+  .employer .ledger__rows:not(.ledger__rows--total) {
+    columns: 2;
+    column-gap: 2.5rem;
+  }
+  .employer .row {
+    break-inside: avoid;
+  }
 }
 
-/* スマホ：画面の下に手取りを常に出しておく（入力しながら結果が見えるように） */
+/* ───────── 計算の前提 ───────── */
+
+.basis {
+  border-top: 1px solid var(--rule);
+  font-size: var(--fs-s);
+}
+
+.basis summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.basis summary::-webkit-details-marker {
+  display: none;
+}
+
+.basis summary::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.basis[open] summary::before {
+  transform: rotate(45deg);
+}
+
+.basis__body {
+  display: grid;
+  gap: 0.25rem;
+  padding-bottom: 1rem;
+}
+
+@media (min-width: 1280px) {
+  .basis__body > .ledger__rows {
+    columns: 2;
+    column-gap: 2.5rem;
+  }
+  .basis .row {
+    break-inside: avoid;
+  }
+}
+
+.basis__heading {
+  margin: 1rem 0 0.25rem;
+  font-size: var(--fs-s);
+}
+
+.basis__list {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.basis__list li + li {
+  margin-top: 0.25rem;
+}
+
+/* ───────── スマホの下部 ───────── */
+
 .dock {
   position: fixed;
   right: 0;
@@ -664,12 +788,12 @@ input {
   .dock {
     display: none;
   }
-  .page {
-    padding-bottom: 3rem;
-  }
 }
 
 @media (max-width: 480px) {
+  .masthead__year {
+    margin-left: 0;
+  }
   .net {
     align-items: start;
     gap: 0.5rem;

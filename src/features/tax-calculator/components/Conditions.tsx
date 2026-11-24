@@ -1,72 +1,76 @@
 import { memo, useId } from 'react';
 import type { ChangeEvent } from 'react';
 import { texts } from '@constants';
+import { PREFECTURES } from '@domain/tax';
+import type { Prefecture } from '@domain/tax';
 
 export interface ConditionInputs {
-  baseSalary: string;
-  hasPension: boolean;
-  hasCareInsurance: boolean;
-  hasChildCare: boolean;
+  salary: string;
+  bonus: string;
+  prefecture: Prefecture;
+  hasSocialInsurance: boolean;
+  isCareInsured: boolean;
 }
 
-type ToggleKey = 'hasPension' | 'hasCareInsurance' | 'hasChildCare';
+export type ToggleKey = 'hasSocialInsurance' | 'isCareInsured';
 
 interface ConditionsProps {
   inputs: ConditionInputs;
-  error: string | null;
-  onSalaryChange: (value: string) => void;
-  onToggle: (key: ToggleKey, value: boolean) => void;
+  salaryError: string | null;
+  onChange: <K extends keyof ConditionInputs>(key: K, value: ConditionInputs[K]) => void;
 }
 
-// 求人票やよく話題にのぼる月給。押すだけで比べられるようにする
 const PRESETS = [20, 25, 30, 35, 40, 50, 70] as const;
 const SLIDER_MIN = 10;
 const SLIDER_MAX = 120;
 
 const OPTIONS: { key: ToggleKey; title: string; note: string }[] = [
-  { key: 'hasPension', ...texts.form.options.pension },
-  { key: 'hasCareInsurance', ...texts.form.options.careInsurance },
-  { key: 'hasChildCare', ...texts.form.options.childCare },
+  { key: 'hasSocialInsurance', ...texts.form.options.socialInsurance },
+  { key: 'isCareInsured', ...texts.form.options.careInsurance },
 ];
 
-export const Conditions = memo(({ inputs, error, onSalaryChange, onToggle }: ConditionsProps) => {
-  const salaryId = useId();
-  const hintId = useId();
-  const errorId = useId();
-  const sliderValue = Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, Number(inputs.baseSalary) || SLIDER_MIN));
+// 全角数字のまま打たれても受け付ける。万円の整数だけを通す
+const toDigits = (raw: string) => {
+  const value = raw.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
+  return /^\d*$/.test(value) ? value : null;
+};
 
-  const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
-    // 全角数字で打たれても受け付ける（日本語入力のまま打つ人が多いため）。
-    // 計算は万円の整数で行う（入力チェックが切り捨てる）ので、小数は最初から打てないようにする
-    const value = e.target.value.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
-    if (/^\d*$/.test(value)) onSalaryChange(value);
+export const Conditions = memo(({ inputs, salaryError, onChange }: ConditionsProps) => {
+  const salaryId = useId();
+  const bonusId = useId();
+  const prefId = useId();
+  const sliderValue = Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, Number(inputs.salary) || SLIDER_MIN));
+
+  const handleDigits = (key: 'salary' | 'bonus') => (e: ChangeEvent<HTMLInputElement>) => {
+    const value = toDigits(e.target.value);
+    if (value !== null) onChange(key, value);
   };
 
   return (
     <section className="conditions" aria-label="条件">
-      <div>
+      <div className="field">
         <label className="field__label" htmlFor={salaryId}>
           {texts.form.salary.label}
         </label>
-        <div className="salary">
+        <div className="amount amount--large">
           <input
             id={salaryId}
-            className="salary__input"
+            className="amount__input"
             inputMode="numeric"
             autoComplete="off"
-            value={inputs.baseSalary}
-            onChange={handleInput}
-            aria-describedby={error ? `${hintId} ${errorId}` : hintId}
-            aria-invalid={error ? true : undefined}
+            value={inputs.salary}
+            onChange={handleDigits('salary')}
+            aria-describedby={`${salaryId}-hint${salaryError ? ` ${salaryId}-error` : ''}`}
+            aria-invalid={salaryError ? true : undefined}
           />
-          <span className="salary__unit">{texts.form.salary.unit}</span>
+          <span className="amount__unit">{texts.form.salary.unit}</span>
         </div>
-        <p className="field__hint" id={hintId}>
+        <p className="field__hint" id={`${salaryId}-hint`}>
           {texts.form.salary.hint}
         </p>
-        {error && (
-          <p className="field__error" id={errorId} role="alert">
-            {error}
+        {salaryError && (
+          <p className="field__error" id={`${salaryId}-error`} role="alert">
+            {salaryError}
           </p>
         )}
         <input
@@ -76,7 +80,7 @@ export const Conditions = memo(({ inputs, error, onSalaryChange, onToggle }: Con
           max={SLIDER_MAX}
           step={1}
           value={sliderValue}
-          onChange={(e) => onSalaryChange(e.target.value)}
+          onChange={(e) => onChange('salary', e.target.value)}
           aria-label={texts.form.salary.sliderLabel}
           aria-valuetext={`${sliderValue}万円`}
         />
@@ -86,8 +90,8 @@ export const Conditions = memo(({ inputs, error, onSalaryChange, onToggle }: Con
               <button
                 type="button"
                 className="preset"
-                aria-pressed={Number(inputs.baseSalary) === value}
-                onClick={() => onSalaryChange(String(value))}
+                aria-pressed={Number(inputs.salary) === value}
+                onClick={() => onChange('salary', String(value))}
               >
                 {value}万
               </button>
@@ -96,8 +100,52 @@ export const Conditions = memo(({ inputs, error, onSalaryChange, onToggle }: Con
         </ul>
       </div>
 
+      <div className="field">
+        <label className="field__label" htmlFor={bonusId}>
+          {texts.form.bonus.label}
+        </label>
+        <div className="amount">
+          <input
+            id={bonusId}
+            className="amount__input"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="0"
+            value={inputs.bonus}
+            onChange={handleDigits('bonus')}
+            aria-describedby={`${bonusId}-hint`}
+          />
+          <span className="amount__unit">{texts.form.bonus.unit}</span>
+        </div>
+        <p className="field__hint" id={`${bonusId}-hint`}>
+          {texts.form.bonus.hint}
+        </p>
+      </div>
+
+      <div className="field">
+        <label className="field__label" htmlFor={prefId}>
+          {texts.form.prefecture.label}
+        </label>
+        <select
+          id={prefId}
+          className="select"
+          value={inputs.prefecture}
+          onChange={(e) => onChange('prefecture', e.target.value as Prefecture)}
+          aria-describedby={`${prefId}-hint`}
+        >
+          {PREFECTURES.map((p) => (
+            <option key={p} value={p}>
+              {p}
+            </option>
+          ))}
+        </select>
+        <p className="field__hint" id={`${prefId}-hint`}>
+          {texts.form.prefecture.hint}
+        </p>
+      </div>
+
       <fieldset className="options">
-        <legend>{texts.form.options.legend}</legend>
+        <legend className="field__label">{texts.form.options.legend}</legend>
         {OPTIONS.map(({ key, title, note }) => (
           <label className="option" key={key}>
             <span className="option__title">{title}</span>
@@ -106,7 +154,7 @@ export const Conditions = memo(({ inputs, error, onSalaryChange, onToggle }: Con
               role="switch"
               className="switch"
               checked={inputs[key]}
-              onChange={(e) => onToggle(key, e.target.checked)}
+              onChange={(e) => onChange(key, e.target.checked)}
             />
             <span className="option__note">{note}</span>
           </label>

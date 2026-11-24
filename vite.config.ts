@@ -17,11 +17,8 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
       '@features': resolve(__dirname, './src/features'),
       '@domain': resolve(__dirname, './src/domain'),
-      '@styles': resolve(__dirname, './src/styles'),
       '@utils': resolve(__dirname, './src/utils'),
-      '@constants': resolve(__dirname, './src/constants'),
-      '@config': resolve(__dirname, './src/config'),
-      '@assets': resolve(__dirname, './src/assets')
+      '@constants': resolve(__dirname, './src/constants')
     }
   },
   build: {

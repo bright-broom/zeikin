@@ -12,16 +12,16 @@ interface EmployerCostProps {
 export const EmployerCost = memo(({ result, period: p }: EmployerCostProps) => {
   const r = result.employer;
   const gross = result.employee.grossIncome[p];
-  const burden = r.totalEmployerTax[p];
+  const burden = r.total[p];
 
   const rows = [
-    { label: texts.labels.residentTax, item: r.residentTax },
     { label: texts.labels.healthInsurance, item: r.healthInsurance },
-    { label: texts.labels.pensionInsurance, item: r.pensionInsurance },
     { label: texts.labels.careInsurance, item: r.careInsurance },
+    { label: texts.labels.childSupport, item: r.childSupport },
+    { label: texts.labels.pensionInsurance, item: r.pensionInsurance },
     { label: texts.labels.employmentInsurance, item: r.employmentInsurance },
-    { label: texts.labels.laborInsurance, item: r.laborInsurance },
-    { label: texts.labels.childCare, item: r.childCare },
+    { label: texts.labels.workersComp, item: r.workersComp },
+    { label: texts.labels.childContribution, item: r.childContribution },
   ];
 
   return (
@@ -61,6 +61,8 @@ export const EmployerCost = memo(({ result, period: p }: EmployerCostProps) => {
             </div>
           ) : null,
         )}
+      </dl>
+      <dl className="ledger__rows ledger__rows--total">
         <div className="row row--total">
           <dt>{texts.employer.burden}</dt>
           <dd className="num">{yen(burden)}</dd>
