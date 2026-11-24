@@ -5,7 +5,7 @@ import type { TaxCalculationInput } from '@domain/tax';
 import { buildExportDocument, EXPORT_SCHEMA, EXPORT_VERSION } from './model';
 import { escapeCsvText, toCsv, UTF8_BOM } from './csv';
 import { toJson } from './json';
-import { toMarkdown } from './markdown';
+import { escapeMarkdownCell, toMarkdown } from './markdown';
 import { buildXlsxParts, columnName, escapeXml, toXlsx } from './xlsx';
 import { fileNameFor } from './formats';
 
@@ -130,6 +130,12 @@ describe('Markdown', () => {
     const table = md.split('\n').filter((l) => l.startsWith('|'));
     expect(table[1]).toBe('| --- | --- | ---: | ---: |');
     for (const line of table) expect(line.split(/(?<!\\)\|/).length).toBe(6);
+  });
+
+  it('表の中の \\ と | と改行を無害にする（\\ を先に処理する）', () => {
+    expect(escapeMarkdownCell('a|b')).toBe('a\\|b');
+    expect(escapeMarkdownCell('a\\|b')).toBe('a\\\\\\|b');
+    expect(escapeMarkdownCell('x\ny')).toBe('x y');
   });
 
   it('条件と手取りが書かれている', () => {
