@@ -9,6 +9,10 @@ import { PaySlip } from './PaySlip';
 import type { Period } from './PaySlip';
 import { EmployerCost } from './EmployerCost';
 import { Basis } from './Basis';
+import { Curve } from './Curve';
+import { Actions } from './Actions';
+import { readInputsFromUrl, useSyncInputsToUrl } from '../hooks/useUrlState';
+import { useTween } from '../hooks/useTween';
 
 const MAN = 10_000;
 const MAX_SALARY_MAN = 10_000; // 月1億円。これより上は入力の打ち間違いとみなす
@@ -23,7 +27,9 @@ const INITIAL: ConditionInputs = {
 };
 
 export const TaxCalculator = () => {
-  const [inputs, setInputs] = useState<ConditionInputs>(INITIAL);
+  // 共有されたリンクから開いたときは、その条件で始める
+  const [inputs, setInputs] = useState<ConditionInputs>(() => readInputsFromUrl(INITIAL));
+  useSyncInputsToUrl(inputs);
   const [period, setPeriod] = useState<Period>('monthly');
   // 入力の途中（空欄など）のあいだは、直前の結果を出したままにして画面が跳ねないようにする
   const lastResult = useRef<TaxCalculationResult | null>(null);
@@ -53,6 +59,15 @@ export const TaxCalculator = () => {
     setInputs((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  const handleSelectSalary = useCallback((salaryMan: number) => {
+    setInputs((prev) => ({ ...prev, salary: String(salaryMan) }));
+  }, []);
+
+  const dockAmount = useTween(result?.employee.takeHome[period] ?? 0);
+  // 図は、明細に出ている結果と同じ月給・賞与で描く（入力の途中でも食い違わないように）
+  const salaryMan = Math.round((result?.employee.salary.monthly ?? 0) / MAN);
+  const bonusMan = Math.round((result?.employee.bonus.annual ?? 0) / MAN);
+
   return (
     <div className="page">
       <header className="masthead">
@@ -61,6 +76,18 @@ export const TaxCalculator = () => {
         <p className="masthead__year">{TAX_YEAR_LABEL}の税率・保険料率</p>
       </header>
 
+      {result && (
+        <p className="print-conditions">
+          {texts.print.conditions(
+            yen(result.employee.salary.monthly),
+            yen(result.employee.bonus.annual),
+            inputs.prefecture,
+            inputs.hasSocialInsurance,
+            inputs.isCareInsured,
+          )}
+        </p>
+      )}
+
       <div className="layout">
         <Conditions inputs={inputs} salaryError={salaryError} onChange={handleChange} />
 
@@ -68,6 +95,15 @@ export const TaxCalculator = () => {
           {result && (
             <>
               <PaySlip result={result} period={period} onPeriodChange={setPeriod} />
+              <Actions />
+              <Curve
+                salary={salaryMan}
+                annualBonus={bonusMan * MAN}
+                prefecture={inputs.prefecture}
+                hasSocialInsurance={inputs.hasSocialInsurance}
+                isCareInsured={inputs.isCareInsured}
+                onSelect={handleSelectSalary}
+              />
               <EmployerCost result={result} period={period} />
               <Basis result={result} prefecture={inputs.prefecture} />
             </>
@@ -79,7 +115,7 @@ export const TaxCalculator = () => {
         <div className="dock" aria-hidden="true">
           <span>
             {texts.dock.label}（{texts.slip.period[period]}）{' '}
-            <span className="dock__amount">{yen(result.employee.takeHome[period])}</span>円
+            <span className="dock__amount">{yen(dockAmount)}</span>円
           </span>
           <a href="#slip" tabIndex={-1}>
             {texts.dock.jump}

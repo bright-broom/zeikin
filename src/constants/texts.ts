@@ -69,6 +69,32 @@ export const texts = {
     workersComp: '労災保険',
     childContribution: '子ども・子育て拠出金',
   },
+  curve: {
+    title: '月給を変えると',
+    marginal: (takeHome: string, deductions: string) =>
+      `いまの月給から1万円上がると、手取りは毎月 ${takeHome}円 増えます。残りの ${deductions}円は税金と社会保険に回ります。`,
+    gradeUp: 'この1万円で標準報酬月額の等級が1つ上がるため、社会保険料が段になって増えます。',
+    summary: (min: number, max: number, salary: number, takeHome: string) =>
+      `月給${min}万〜${max}万円での手取り・税金・社会保険の内訳の図。いまの月給${salary}万円では手取り${takeHome}円。`,
+    caption: '賞与のない月の内訳です。グラフをなぞると各月給の内訳が、押すとその月給で計算した明細が出ます。',
+    yUnit: '万円',
+    xUnit: '月給（万円）',
+    pensionCap: '厚生年金はここで頭打ち',
+    now: 'いまの条件',
+    tipSalary: (salary: number) => `月給 ${salary}万円`,
+    clickHint: '押すとこの月給にします',
+  },
+  print: {
+    conditions: (salary: string, bonus: string, prefecture: string, insured: boolean, care: boolean) =>
+      `計算の条件：月給 ${salary}円、賞与 年${bonus}円、協会けんぽ ${prefecture}、${insured ? '健康保険・厚生年金に加入' : '健康保険・厚生年金に未加入'}${care ? '、介護保険あり（40〜64歳）' : ''}`,
+  },
+  actions: {
+    copy: 'リンクをコピー',
+    copied: 'コピーしました',
+    copyFailed: 'コピーできませんでした。アドレス欄の URL をお使いください',
+    print: '印刷・PDFで保存',
+    note: 'リンクには入力した条件が入ります',
+  },
   employer: {
     title: '会社が払っている額',
     lead: '社会保険料の半分と、労災保険・拠出金は会社が払います。所得税と住民税は本人だけの負担です。',
