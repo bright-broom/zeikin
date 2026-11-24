@@ -8,8 +8,9 @@ https://zeikin-tedori.pages.dev/
 - 健康保険は協会けんぽの都道府県別の料率、介護保険（40〜64歳）、子ども・子育て支援金に対応
 - 標準報酬月額の等級、賞与の保険料の上限、端数処理まで実務と同じ扱いにしています
 - 会社が負担している社会保険料も表示します
+- 試算結果を CSV・Excel・JSON・Markdown で書き出せます
 
-計算の仕様と出典は [docs/calculation.md](docs/calculation.md)、画面のデザインは [docs/design.md](docs/design.md) にあります。
+計算の仕様と出典は [docs/calculation.md](docs/calculation.md)、書き出しの形式は [docs/export.md](docs/export.md)、画面のデザインは [docs/design.md](docs/design.md) にあります。
 
 ## 開発
 
@@ -39,6 +40,9 @@ src/
     rates.ts            税率・保険料率（年度が変わったらここだけ直す）
     calculate.ts        計算（画面に依存しない関数）
     calculate.test.ts   手計算と照らし合わせたテスト
+  features/tax-calculator/export/
+    model.ts            書き出しの中身（全形式の元）
+    csv.ts / xlsx.ts / json.ts / markdown.ts   各形式への変換
   features/tax-calculator/components/
     TaxCalculator.tsx   入力の状態と画面全体
     Conditions.tsx      入力欄

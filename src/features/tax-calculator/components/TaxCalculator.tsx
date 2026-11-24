@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { calculatePay, TAX_YEAR_LABEL } from '@domain/tax';
-import type { TaxCalculationResult } from '@domain/tax';
+import type { TaxCalculationInput, TaxCalculationResult } from '@domain/tax';
 import { texts } from '@constants';
 import { formatYen as yen } from '@utils';
 import { Conditions } from './Conditions';
@@ -11,6 +11,7 @@ import { EmployerCost } from './EmployerCost';
 import { Basis } from './Basis';
 import { Curve } from './Curve';
 import { Actions } from './Actions';
+import { ExportPanel } from './ExportPanel';
 import { readInputsFromUrl, useSyncInputsToUrl } from '../hooks/useUrlState';
 import { useTween } from '../hooks/useTween';
 
@@ -26,32 +27,39 @@ const INITIAL: ConditionInputs = {
   isCareInsured: false,
 };
 
+interface Calculation {
+  input: TaxCalculationInput;
+  result: TaxCalculationResult;
+}
+
 export const TaxCalculator = () => {
   // 共有されたリンクから開いたときは、その条件で始める
   const [inputs, setInputs] = useState<ConditionInputs>(() => readInputsFromUrl(INITIAL));
   useSyncInputsToUrl(inputs);
   const [period, setPeriod] = useState<Period>('monthly');
-  // 入力の途中（空欄など）のあいだは、直前の結果を出したままにして画面が跳ねないようにする
-  const lastResult = useRef<TaxCalculationResult | null>(null);
+  // 入力の途中（空欄など）のあいだは、直前の結果を出したままにして画面が跳ねないようにする。
+  // 書き出しで条件と結果が食い違わないよう、計算に使った条件と結果は必ず 1 組で持つ
+  const lastCalc = useRef<Calculation | null>(null);
 
-  const computed = useMemo(() => {
+  const computed = useMemo((): { calc: Calculation | null; error: string | null } => {
     const salary = Number(inputs.salary);
     if (!inputs.salary || !Number.isInteger(salary) || salary < 1 || salary > MAX_SALARY_MAN) {
-      return { result: null, error: texts.errors.salary };
+      return { calc: null, error: texts.errors.salary };
     }
     const bonus = Math.min(Number(inputs.bonus) || 0, MAX_BONUS_MAN);
-    const result = calculatePay({
+    const input: TaxCalculationInput = {
       monthlySalary: salary * MAN,
       annualBonus: bonus * MAN,
       prefecture: inputs.prefecture,
       hasSocialInsurance: inputs.hasSocialInsurance,
       isCareInsured: inputs.isCareInsured,
-    });
-    return { result, error: null };
+    };
+    return { calc: { input, result: calculatePay(input) }, error: null };
   }, [inputs]);
 
-  if (computed.result) lastResult.current = computed.result;
-  const result = computed.result ?? lastResult.current;
+  if (computed.calc) lastCalc.current = computed.calc;
+  const calc = computed.calc ?? lastCalc.current;
+  const result = calc?.result ?? null;
   // 空欄は打ち直しの途中なので、エラーとして責めない
   const salaryError = inputs.salary === '' ? null : computed.error;
 
@@ -92,10 +100,11 @@ export const TaxCalculator = () => {
         <Conditions inputs={inputs} salaryError={salaryError} onChange={handleChange} />
 
         <main className="results">
-          {result && (
+          {calc && result && (
             <>
               <PaySlip result={result} period={period} onPeriodChange={setPeriod} />
               <Actions />
+              <ExportPanel input={calc.input} result={result} />
               <Curve
                 salary={salaryMan}
                 annualBonus={bonusMan * MAN}
