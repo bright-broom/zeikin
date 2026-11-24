@@ -1,0 +1,830 @@
+/*
+ * ZEIKIN の見た目。題材は会社員が毎月受け取る給与明細。
+ * 机（背景）の上に紙の明細が載っている、という絵だけを強く見せ、ほかは控えめにする。
+ * 書体は BIZ UDPゴシック。日本語は端末の標準（Windows は同書体、Mac はヒラギノ）に任せ、
+ * 英数字だけ同梱して金額の見た目をそろえる。数字は tabular-nums で桁を縦にそろえる。
+ */
+
+:root {
+  /* 机・紙・罫線・墨と、内訳の 3 色（手取り＝藍、税＝朱、社会保険＝黄土）、会社負担＝青竹 */
+  --desk: #e6ecf1;
+  --paper: #ffffff;
+  --rule: #b9c5cf;
+  --rule-faint: #dfe6ec;
+  --ink: #17202b;
+  --ink-soft: #4d5a68;
+  --ink-faint: #66727f;
+  --ai: #1f3f73;
+  --ai-tint: #e8eef7;
+  --shu: #c2412d;
+  --ocher: #a87818;
+  --aotake: #2f6f62;
+  --aotake-tint: #e6f1ee;
+
+  --font-text: 'BIZ UDPGothic', 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP', 'Noto Sans CJK JP', system-ui, sans-serif;
+  --font-num: 'BIZ UDPGothic', 'Hiragino Sans', system-ui, sans-serif;
+
+  /* 文字の段階（1.25 倍） */
+  --fs-xs: 0.8rem;
+  --fs-s: 0.875rem;
+  --fs-m: 1rem;
+  --fs-l: 1.25rem;
+  --fs-xl: 1.563rem;
+  --fs-hero: clamp(2.6rem, 6vw, 4rem);
+
+  --radius: 2px; /* 帳票なので角はほぼ直角 */
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--fs-m);
+  line-height: 1.7;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ai);
+  outline-offset: 2px;
+}
+
+a {
+  color: var(--ai);
+}
+
+.num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ───────── 全体 ───────── */
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 6rem;
+}
+
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1.25rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 2px solid var(--ink);
+}
+
+.masthead__name {
+  margin: 0;
+  font-family: var(--font-num);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.masthead__lead {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-s);
+}
+
+.masthead__year {
+  margin: 0 0 0 auto;
+  color: var(--ink-faint);
+  font-size: var(--fs-xs);
+}
+
+.layout {
+  display: grid;
+  gap: 2rem;
+}
+
+.results {
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+  min-width: 0;
+}
+
+@media (min-width: 960px) {
+  .page {
+    padding: 2.5rem 2rem 4rem;
+  }
+  .layout {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 3rem;
+  }
+  /* 条件は画面に貼り付けておき、右の明細だけをスクロールして読む */
+  .conditions {
+    position: sticky;
+    top: 1.5rem;
+    align-self: start;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding-right: 0.25rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .layout {
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 4rem;
+  }
+}
+
+/* ───────── 条件（左） ───────── */
+
+.conditions {
+  display: grid;
+  gap: 1.75rem;
+  align-content: start;
+}
+
+.field {
+  min-width: 0;
+}
+
+.field__label {
+  display: block;
+  margin-bottom: 0.4rem;
+  padding: 0;
+  font-weight: 700;
+}
+
+.amount {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--ink);
+}
+
+.amount:focus-within {
+  border-bottom-color: var(--ai);
+  box-shadow: 0 1px 0 var(--ai);
+}
+
+.amount__input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-num);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.amount__input::placeholder {
+  color: var(--rule);
+}
+
+.amount__input:focus-visible {
+  outline: none;
+}
+
+.amount--large {
+  border-bottom-width: 2px;
+}
+
+.amount--large .amount__input {
+  font-size: 2.75rem;
+  line-height: 1.1;
+}
+
+.amount__unit {
+  flex: none;
+  font-weight: 700;
+}
+
+.amount--large .amount__unit {
+  font-size: var(--fs-l);
+}
+
+.field__hint {
+  margin: 0.4rem 0 0;
+  color: var(--ink-faint);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+}
+
+.field__error {
+  margin: 0.4rem 0 0;
+  color: var(--shu);
+  font-size: var(--fs-s);
+  font-weight: 700;
+}
+
+.slider {
+  width: 100%;
+  height: 2rem;
+  margin: 0.75rem 0 0;
+  accent-color: var(--ai);
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.preset {
+  min-width: 3.4rem;
+  min-height: 2.5rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font-family: var(--font-num);
+  font-size: var(--fs-s);
+  cursor: pointer;
+}
+
+.preset:hover {
+  border-color: var(--ink);
+}
+
+.preset[aria-pressed='true'] {
+  border-color: var(--ai);
+  background: var(--ai);
+  color: #fff;
+}
+
+.select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 2.25rem 0 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background:
+    var(--paper)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2317202b' stroke-width='1.6'/%3E%3C/svg%3E")
+    no-repeat right 0.75rem center;
+  appearance: none;
+  cursor: pointer;
+}
+
+.select:hover {
+  border-color: var(--ink);
+}
+
+.options {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--rule-faint);
+  cursor: pointer;
+}
+
+.option:last-child {
+  border-bottom: 0;
+}
+
+.option__title {
+  font-weight: 700;
+}
+
+.option__note {
+  grid-column: 1;
+  color: var(--ink-faint);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+}
+
+/* チェックボックスをスイッチの形にする（中身は本物の checkbox） */
+.switch {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  appearance: none;
+  position: relative;
+  width: 3.25rem;
+  height: 1.85rem;
+  margin: 0;
+  border: 1px solid var(--rule);
+  border-radius: 1rem;
+  background: var(--rule-faint);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(1.85rem - 6px);
+  height: calc(1.85rem - 6px);
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 1px 2px rgba(23, 32, 43, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.switch:checked {
+  border-color: var(--ai);
+  background: var(--ai);
+}
+
+.switch:checked::after {
+  transform: translateX(1.4rem);
+}
+
+/* ───────── 給与明細（右） ───────── */
+
+.slip {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  /* この画面で影を付けるのは明細の紙だけ */
+  box-shadow: 0 18px 40px -24px rgba(23, 32, 43, 0.35);
+}
+
+.slip__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.slip__title {
+  margin: 0;
+  font-size: var(--fs-l);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+}
+
+.period {
+  display: inline-flex;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+}
+
+.period button {
+  min-height: 2.5rem;
+  padding: 0 1rem;
+  border: 0;
+  background: transparent;
+  font-size: var(--fs-s);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.period button + button {
+  border-left: 1px solid var(--ink);
+}
+
+.period button[aria-pressed='true'] {
+  background: var(--ink);
+  color: #fff;
+}
+
+.net {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 1.25rem 1.25rem;
+}
+
+.net__label {
+  margin: 0;
+  font-weight: 700;
+}
+
+.net__amount {
+  margin: 0.1rem 0 0;
+  color: var(--ai);
+  font-family: var(--font-num);
+  font-size: var(--fs-hero);
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.net__yen {
+  margin-left: 0.2em;
+  font-size: 0.45em;
+}
+
+.net__sub {
+  margin: 0.4rem 0 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-s);
+}
+
+/* 手取り率の丸印（明細の検印に見立てたもの） */
+.seal {
+  display: grid;
+  place-content: center;
+  width: 5.75rem;
+  height: 5.75rem;
+  border: 3px solid var(--shu);
+  border-radius: 50%;
+  color: var(--shu);
+  text-align: center;
+  line-height: 1.2;
+  transform: rotate(-8deg);
+}
+
+.seal__label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.seal__value {
+  font-family: var(--font-num);
+  font-size: var(--fs-l);
+  font-weight: 700;
+}
+
+/* 額面を手取り・税・社会保険に分けた帯 */
+.split {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.split__bar {
+  display: flex;
+  height: 1rem;
+  overflow: hidden;
+  background: var(--rule-faint);
+}
+
+.split__seg {
+  height: 100%;
+  transition: flex-basis 0.25s ease;
+}
+
+.split__legend {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-s);
+}
+
+.split__legend li {
+  display: grid;
+  gap: 0.1rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid var(--c);
+}
+
+.split__legend .num {
+  font-weight: 700;
+}
+
+.split__legend small {
+  color: var(--ink-faint);
+  font-size: var(--fs-xs);
+}
+
+/* 支給・控除の表 */
+.ledger {
+  display: grid;
+  border-top: 2px solid var(--ink);
+}
+
+@media (min-width: 640px) {
+  .ledger {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ledger__col + .ledger__col {
+    border-left: 1px solid var(--rule);
+  }
+}
+
+.ledger__col {
+  display: flex;
+  flex-direction: column;
+}
+
+.ledger__caption {
+  margin: 0;
+  padding: 0.45rem 1.25rem;
+  border-bottom: 1px solid var(--rule);
+  background: var(--ai-tint);
+  font-size: var(--fs-s);
+  font-weight: 700;
+  letter-spacing: 0.4em;
+}
+
+.ledger__rows {
+  flex: 1;
+  margin: 0;
+}
+
+.ledger__rows--total {
+  flex: none;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 1.25rem;
+  border-bottom: 1px solid var(--rule-faint);
+}
+
+.row dt {
+  color: var(--ink-soft);
+}
+
+.row dd {
+  margin: 0;
+  text-align: right;
+}
+
+.row--group dt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.row--group dt::before {
+  content: '';
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--c);
+}
+
+.row--total {
+  border-top: 1px solid var(--rule);
+  border-bottom: 0;
+  font-weight: 700;
+}
+
+.row--total dt {
+  color: var(--ink);
+}
+
+/* 明細の最終行。手取りを「総支給額 − 控除合計」の式で締める */
+.slip__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0.85rem 1.25rem;
+  border-top: 2px solid var(--ink);
+  font-size: var(--fs-s);
+  font-weight: 700;
+}
+
+.slip__formula {
+  color: var(--ink-soft);
+}
+
+.slip__formula strong {
+  color: var(--ai);
+  font-size: var(--fs-m);
+}
+
+/* ───────── 会社の負担 ───────── */
+
+.employer {
+  padding: 1.25rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: 4px solid var(--aotake);
+}
+
+.employer__title {
+  margin: 0;
+  font-size: var(--fs-l);
+  font-weight: 700;
+}
+
+.employer__lead {
+  margin: 0.25rem 0 1rem;
+  color: var(--ink-soft);
+  font-size: var(--fs-s);
+}
+
+.equation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.9rem;
+  margin: 0 0 1rem;
+  padding: 1rem;
+  background: var(--aotake-tint);
+}
+
+.equation__term {
+  display: grid;
+}
+
+.equation__term small {
+  color: var(--ink-soft);
+  font-size: var(--fs-xs);
+}
+
+.equation__term .num {
+  font-size: var(--fs-l);
+  font-weight: 700;
+}
+
+.equation__op {
+  padding-bottom: 0.2rem;
+  color: var(--ink-faint);
+  font-size: var(--fs-l);
+}
+
+.equation__term--result .num {
+  color: var(--aotake);
+  font-size: var(--fs-xl);
+}
+
+.employer .row,
+.basis .row {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* 会社の負担は、明細と並べて読めるよう広い画面では 2 列にする */
+@media (min-width: 1280px) {
+  .employer .ledger__rows:not(.ledger__rows--total) {
+    columns: 2;
+    column-gap: 2.5rem;
+  }
+  .employer .row {
+    break-inside: avoid;
+  }
+}
+
+/* ───────── 計算の前提 ───────── */
+
+.basis {
+  border-top: 1px solid var(--rule);
+  font-size: var(--fs-s);
+}
+
+.basis summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.basis summary::-webkit-details-marker {
+  display: none;
+}
+
+.basis summary::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.basis[open] summary::before {
+  transform: rotate(45deg);
+}
+
+.basis__body {
+  display: grid;
+  gap: 0.25rem;
+  padding-bottom: 1rem;
+}
+
+@media (min-width: 1280px) {
+  .basis__body > .ledger__rows {
+    columns: 2;
+    column-gap: 2.5rem;
+  }
+  .basis .row {
+    break-inside: avoid;
+  }
+}
+
+.basis__heading {
+  margin: 1rem 0 0.25rem;
+  font-size: var(--fs-s);
+}
+
+.basis__list {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.basis__list li + li {
+  margin-top: 0.25rem;
+}
+
+/* ───────── スマホの下部 ───────── */
+
+.dock {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: var(--ink);
+  color: #fff;
+}
+
+.dock__amount {
+  font-family: var(--font-num);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+}
+
+.dock a {
+  color: #fff;
+  font-size: var(--fs-s);
+}
+
+@media (min-width: 960px) {
+  .dock {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .masthead__year {
+    margin-left: 0;
+  }
+  .net {
+    align-items: start;
+    gap: 0.5rem;
+  }
+  .seal {
+    width: 4.25rem;
+    height: 4.25rem;
+    border-width: 2px;
+  }
+  .seal__label {
+    font-size: 0.65rem;
+  }
+  .seal__value {
+    font-size: var(--fs-s);
+  }
+  .split__legend {
+    gap: 0.25rem;
+  }
+  .split__legend li {
+    padding-left: 0.5rem;
+    border-left-width: 3px;
+  }
+  .split__legend .num {
+    font-size: var(--fs-xs);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}

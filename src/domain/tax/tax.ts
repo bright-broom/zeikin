@@ -1,36 +1,59 @@
+import type { Prefecture } from './rates';
+
 export interface TaxCalculationInput {
-  baseSalary: number;   // 月額基本給（万円単位）
-  bonus: number;        // ボーナス（万円単位）
-  hasPension: boolean;  // 厚生年金加入有無
-  hasCareInsurance: boolean; // 介護保険加入有無
-  hasChildCare: boolean;
+  /** 月給（額面・円） */
+  monthlySalary: number;
+  /** 賞与の年間合計（額面・円）。夏冬 2回に等分して計算する */
+  annualBonus: number;
+  /** 健康保険・厚生年金に加入しているか（会社員の通常の働き方なら加入） */
+  hasSocialInsurance: boolean;
+  /** 40〜64歳か（介護保険料がかかる） */
+  isCareInsured: boolean;
+  /** 協会けんぽの加入支部 */
+  prefecture: Prefecture;
 }
 
 export interface MonthlyAnnual {
-  annual: number;  // 年間の金額
+  /** 賞与のない月の 1か月分 */
   monthly: number;
+  /** 月給 12か月分と賞与を合わせた 1年分 */
+  annual: number;
 }
 
 export interface TaxCalculationResult {
   employee: {
-    grossIncome: MonthlyAnnual;        // 総支給額（額面）
-    incomeTax: MonthlyAnnual;          // 所得税
-    residentTax: MonthlyAnnual;        // 住民税
-    healthInsurance: MonthlyAnnual;    // 健康保険
-    pensionInsurance?: MonthlyAnnual;  // 厚生年金（任意）
-    careInsurance?: MonthlyAnnual;     // 介護保険（任意）
-    employmentInsurance: MonthlyAnnual;// 雇用保険
-    totalTax: MonthlyAnnual;           // 税金合計
-    takeHome: MonthlyAnnual;           // 手取り額
+    salary: MonthlyAnnual;
+    bonus: MonthlyAnnual;
+    grossIncome: MonthlyAnnual;
+    incomeTax: MonthlyAnnual;
+    residentTax: MonthlyAnnual;
+    healthInsurance: MonthlyAnnual;
+    careInsurance?: MonthlyAnnual;
+    childSupport?: MonthlyAnnual;
+    pensionInsurance?: MonthlyAnnual;
+    employmentInsurance: MonthlyAnnual;
+    totalTax: MonthlyAnnual;
+    takeHome: MonthlyAnnual;
   };
   employer: {
-    residentTax: MonthlyAnnual;        // 会社負担分の住民税（労使折半）
-    healthInsurance: MonthlyAnnual;    // 会社負担分の健康保険
-    pensionInsurance?: MonthlyAnnual;  // 会社負担分の厚生年金
-    careInsurance?: MonthlyAnnual;     // 会社負担分の介護保険
-    employmentInsurance: MonthlyAnnual;// 会社負担分の雇用保険
-    laborInsurance: MonthlyAnnual;     // 労災保険
-    childCare?: MonthlyAnnual;         // 会社負担の子育て支援
-    totalEmployerTax: MonthlyAnnual;
+    healthInsurance: MonthlyAnnual;
+    careInsurance?: MonthlyAnnual;
+    childSupport?: MonthlyAnnual;
+    pensionInsurance?: MonthlyAnnual;
+    childContribution?: MonthlyAnnual;
+    employmentInsurance: MonthlyAnnual;
+    workersComp: MonthlyAnnual;
+    total: MonthlyAnnual;
   };
-} 
+  /** 計算の途中の値。画面の「計算の前提」で使う */
+  basis: {
+    standardMonthly: number;
+    pensionStandardMonthly: number;
+    salaryIncome: number;
+    basicDeduction: number;
+    socialInsuranceDeduction: number;
+    taxableIncome: number;
+    residentTaxableIncome: number;
+    healthRate: number;
+  };
+}
