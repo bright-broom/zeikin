@@ -617,6 +617,237 @@ a {
   font-size: var(--fs-m);
 }
 
+/* ───────── 明細の下の操作 ───────── */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.6rem;
+  margin-top: -0.6rem; /* 明細の紙に付いている操作に見せる */
+}
+
+.action {
+  min-height: 2.5rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font-size: var(--fs-s);
+  cursor: pointer;
+}
+
+.action:hover {
+  border-color: var(--ink);
+}
+
+.actions__note {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: var(--fs-xs);
+}
+
+/* ───────── 月給を変えると（積み上げの図） ───────── */
+
+.curve {
+  padding: 1.25rem 1.25rem 1rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: 4px solid var(--ai);
+}
+
+.curve__title {
+  margin: 0;
+  font-size: var(--fs-l);
+  font-weight: 700;
+}
+
+.curve__lead {
+  max-width: 44em;
+  margin: 0.25rem 0 0.75rem;
+  color: var(--ink-soft);
+  font-size: var(--fs-s);
+}
+
+.curve__figure {
+  margin: 0;
+}
+
+.curve__plot {
+  position: relative;
+}
+
+.curve__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.curve__grid line {
+  stroke: var(--rule-faint);
+  stroke-width: 1;
+}
+
+.curve__grid text,
+.curve__tick,
+.curve__axis {
+  fill: var(--ink-faint);
+  font-size: 12px;
+}
+
+.curve__band {
+  opacity: 0.88;
+  stroke: var(--paper);
+  stroke-width: 1;
+  /* 条件を変えたときに帯が形を変えて移る（d の補間に対応したブラウザだけ） */
+  transition: d 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.curve__cap line {
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 0.55;
+}
+
+.curve__cap text {
+  fill: var(--ink-soft);
+  font-size: 12px;
+}
+
+.curve__now line {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.curve__now circle {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 2.5;
+}
+
+.curve__guide {
+  stroke: var(--ink);
+  stroke-width: 1;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.curve__hit {
+  fill: transparent;
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+
+/* なぞった月給の内訳。点の左右どちらかに寄せ、図からはみ出さないようにする */
+.curve__tip {
+  position: absolute;
+  top: 2.4rem;
+  width: 12.5rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  box-shadow: 0 10px 24px -16px rgba(23, 32, 43, 0.45);
+  font-size: var(--fs-xs);
+  pointer-events: none;
+  transform: translateX(0.75rem);
+}
+
+.curve__tip[data-side='left'] {
+  transform: translateX(calc(-100% - 0.75rem));
+}
+
+.curve__tip p,
+.curve__tip dl {
+  margin: 0;
+}
+
+.curve__tip-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--fs-s);
+  font-weight: 700;
+}
+
+.curve__tip-head span {
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+
+.curve__tip dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.curve__tip dt {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ink-soft);
+}
+
+.curve__tip dt::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--c);
+}
+
+.curve__tip dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.curve__tip-rate {
+  padding-top: 0.35rem;
+  margin-top: 0.35rem;
+  border-top: 1px solid var(--rule-faint);
+  color: var(--ink-soft);
+}
+
+.curve__tip-rate .num {
+  color: var(--ai);
+  font-weight: 700;
+}
+
+.curve__tip-hint {
+  margin-top: 0.3rem;
+  color: var(--ai);
+}
+
+.curve__caption {
+  margin-top: 0.5rem;
+  color: var(--ink-faint);
+  font-size: var(--fs-xs);
+}
+
+@media (max-width: 640px) {
+  /* 図は横幅に合わせて縮むので、文字は viewBox の単位で大きめにしておく */
+  .curve__grid text,
+  .curve__tick,
+  .curve__axis,
+  .curve__cap text {
+    font-size: 22px;
+  }
+  .curve__tip {
+    position: static;
+    width: auto;
+    margin-top: 0.5rem;
+    transform: none;
+  }
+  .curve__tip[data-side='left'] {
+    transform: none;
+  }
+}
+
 /* ───────── 会社の負担 ───────── */
 
 .employer {
@@ -826,5 +1057,73 @@ a {
   *::before,
   *::after {
     transition: none !important;
+  }
+}
+
+/* 印刷したときだけ出す、計算の条件 */
+.print-conditions {
+  display: none;
+}
+
+/* 読み上げにだけ使う文字 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ───────── 印刷・PDF ─────────
+ * 紙に残すのは明細と会社の負担だけ。入力欄・図・操作は出さない */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  body {
+    background: #fff;
+  }
+  .page {
+    max-width: none;
+    padding: 0;
+  }
+  .layout {
+    display: block;
+  }
+  .conditions,
+  .actions,
+  .curve,
+  .basis,
+  .dock,
+  .period {
+    display: none !important;
+  }
+  .print-conditions {
+    display: block;
+    margin: 0 0 4mm;
+    font-size: 10pt;
+  }
+  .slip {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  .employer {
+    margin-top: 6mm;
+    break-inside: avoid;
+  }
+  .ledger__caption {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .split__bar,
+  .split__seg,
+  .row--group dt::before {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
