@@ -19,7 +19,6 @@
   --shu: #c2412d;
   --ocher: #a87818;
   --aotake: #2f6f62;
-  --aotake-tint: #e6f1ee;
 
   --font-text: 'BIZ UDPGothic', 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP', 'Noto Sans CJK JP', system-ui, sans-serif;
   --font-num: 'BIZ UDPGothic', 'Hiragino Sans', system-ui, sans-serif;
@@ -98,7 +97,6 @@ a {
   font-family: var(--font-num);
   font-size: var(--fs-xl);
   font-weight: 700;
-  letter-spacing: 0.18em;
 }
 
 .masthead__lead {
@@ -349,7 +347,6 @@ a {
   height: calc(1.85rem - 6px);
   border-radius: 50%;
   background: var(--paper);
-  box-shadow: 0 1px 2px rgba(23, 32, 43, 0.25);
   transition: transform 0.15s ease;
 }
 
@@ -366,9 +363,7 @@ a {
 
 .slip {
   background: var(--paper);
-  border: 1px solid var(--rule);
-  /* この画面で影を付けるのは明細の紙だけ */
-  box-shadow: 0 18px 40px -24px rgba(23, 32, 43, 0.35);
+  border: 1px solid var(--ink);
 }
 
 .slip__head {
@@ -384,7 +379,6 @@ a {
   margin: 0;
   font-size: var(--fs-l);
   font-weight: 700;
-  letter-spacing: 0.3em;
 }
 
 .period {
@@ -446,30 +440,10 @@ a {
   font-size: var(--fs-s);
 }
 
-/* 手取り率の丸印（明細の検印に見立てたもの） */
-.seal {
-  display: grid;
-  place-content: center;
-  width: 5.75rem;
-  height: 5.75rem;
-  border: 3px solid var(--shu);
-  border-radius: 50%;
-  color: var(--shu);
-  text-align: center;
-  line-height: 1.2;
-  transform: rotate(-8deg);
-}
-
-.seal__label {
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
-
-.seal__value {
-  font-family: var(--font-num);
-  font-size: var(--fs-l);
-  font-weight: 700;
+.net__rate {
+  margin: 0.15rem 0 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-s);
 }
 
 /* 額面を手取り・税・社会保険に分けた帯 */
@@ -542,7 +516,6 @@ a {
   background: var(--ai-tint);
   font-size: var(--fs-s);
   font-weight: 700;
-  letter-spacing: 0.4em;
 }
 
 .ledger__rows {
@@ -731,7 +704,6 @@ a {
   padding: 1.25rem 1.25rem 1rem;
   background: var(--paper);
   border: 1px solid var(--rule);
-  border-top: 4px solid var(--ai);
 }
 
 .curve__title {
@@ -828,7 +800,6 @@ a {
   padding: 0.6rem 0.75rem;
   background: var(--paper);
   border: 1px solid var(--ink);
-  box-shadow: 0 10px 24px -16px rgba(23, 32, 43, 0.45);
   font-size: var(--fs-xs);
   pointer-events: none;
   transform: translateX(0.75rem);
@@ -932,7 +903,6 @@ a {
   padding: 1.25rem;
   background: var(--paper);
   border: 1px solid var(--rule);
-  border-top: 4px solid var(--aotake);
 }
 
 .employer__title {
@@ -953,8 +923,8 @@ a {
   align-items: flex-end;
   gap: 0.5rem 0.9rem;
   margin: 0 0 1rem;
-  padding: 1rem;
-  background: var(--aotake-tint);
+  padding: 0 0 1rem;
+  border-bottom: 1px solid var(--rule);
 }
 
 .equation__term {
@@ -1107,17 +1077,6 @@ a {
     align-items: start;
     gap: 0.5rem;
   }
-  .seal {
-    width: 4.25rem;
-    height: 4.25rem;
-    border-width: 2px;
-  }
-  .seal__label {
-    font-size: 0.65rem;
-  }
-  .seal__value {
-    font-size: var(--fs-s);
-  }
   .split__legend {
     gap: 0.25rem;
   }
@@ -1188,7 +1147,6 @@ a {
     font-size: 10pt;
   }
   .slip {
-    box-shadow: none;
     break-inside: avoid;
   }
   .employer {

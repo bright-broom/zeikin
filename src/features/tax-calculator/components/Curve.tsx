@@ -177,7 +177,7 @@ export const Curve = memo(({ salary, annualBonus, prefecture, hasSocialInsurance
               </div>
             </dl>
             <p className="curve__tip-rate">
-              {texts.slip.seal} <span className="num">{rate}%</span>
+              {texts.slip.rate} <span className="num">{rate}%</span>
             </p>
             {hover && hover.salary !== salary && <p className="curve__tip-hint">{texts.curve.clickHint}</p>}
           </div>

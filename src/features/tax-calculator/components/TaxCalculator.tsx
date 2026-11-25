@@ -13,7 +13,6 @@ import { Curve } from './Curve';
 import { Actions } from './Actions';
 import { ExportPanel } from './ExportPanel';
 import { readInputsFromUrl, useSyncInputsToUrl } from '../hooks/useUrlState';
-import { useTween } from '../hooks/useTween';
 
 const MAN = 10_000;
 const MAX_SALARY_MAN = 10_000; // 月1億円。これより上は入力の打ち間違いとみなす
@@ -71,7 +70,7 @@ export const TaxCalculator = () => {
     setInputs((prev) => ({ ...prev, salary: String(salaryMan) }));
   }, []);
 
-  const dockAmount = useTween(result?.employee.takeHome[period] ?? 0);
+  const dockAmount = result?.employee.takeHome[period] ?? 0;
   // 図は、明細に出ている結果と同じ月給・賞与で描く（入力の途中でも食い違わないように）
   const salaryMan = Math.round((result?.employee.salary.monthly ?? 0) / MAN);
   const bonusMan = Math.round((result?.employee.bonus.annual ?? 0) / MAN);
