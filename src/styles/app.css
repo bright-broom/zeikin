@@ -32,6 +32,11 @@
   --fs-hero: clamp(2.6rem, 6vw, 4rem);
 
   --radius: 2px; /* 帳票なので角はほぼ直角 */
+
+  /* 部品の寸法。押せるものは同じ高さ・同じ左右の余白、紙は同じ内側の余白にそろえる */
+  --control-h: 2.75rem;
+  --control-px: 0.9rem;
+  --panel-pad: 1.25rem;
 }
 
 *,
@@ -222,9 +227,6 @@ a {
 
 .field__hint {
   margin: 0.4rem 0 0;
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
-  line-height: 1.5;
 }
 
 .field__error {
@@ -241,6 +243,78 @@ a {
   accent-color: var(--ai);
 }
 
+/*
+ * 押せる部品（月給の候補・月額/年額・リンクのコピーと印刷・書き出し・都道府県）の共通の形。
+ * 高さ・枠・文字の大きさ・ホバー・選択中の見た目を 1か所で決める。
+ */
+.preset,
+.period button,
+.action,
+.export__button,
+.select {
+  min-height: var(--control-h);
+  padding: 0 var(--control-px);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font-size: var(--fs-s);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.preset:hover,
+.period button:hover,
+.action:hover,
+.export__button:hover:not(:disabled),
+.select:hover {
+  border-color: var(--ink);
+}
+
+.preset[aria-pressed='true'],
+.period button[aria-pressed='true'] {
+  border-color: var(--ai);
+  background: var(--ai);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* 紙（明細のあとに続く区画）の共通の形。見出し・説明・注記の大きさと間隔をそろえる */
+.export,
+.curve,
+.employer {
+  padding: var(--panel-pad);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+}
+
+.slip__title,
+.export__title,
+.curve__title,
+.employer__title {
+  margin: 0;
+  font-size: var(--fs-l);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.export__lead,
+.curve__lead,
+.employer__lead {
+  margin: 0.25rem 0 1rem;
+  color: var(--ink-soft);
+  font-size: var(--fs-s);
+}
+
+.field__hint,
+.option__note,
+.actions__note,
+.export__status,
+.curve__caption {
+  color: var(--ink-faint);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+}
+
 .presets {
   display: flex;
   flex-wrap: wrap;
@@ -252,42 +326,19 @@ a {
 
 .preset {
   min-width: 3.4rem;
-  min-height: 2.5rem;
   padding: 0 0.6rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper);
   font-family: var(--font-num);
-  font-size: var(--fs-s);
-  cursor: pointer;
-}
-
-.preset:hover {
-  border-color: var(--ink);
-}
-
-.preset[aria-pressed='true'] {
-  border-color: var(--ai);
-  background: var(--ai);
-  color: #fff;
 }
 
 .select {
   width: 100%;
-  min-height: 2.75rem;
-  padding: 0 2.25rem 0 0.75rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
+  padding-right: 2.25rem;
+  font-size: var(--fs-m);
   background:
     var(--paper)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2317202b' stroke-width='1.6'/%3E%3C/svg%3E")
     no-repeat right 0.75rem center;
   appearance: none;
-  cursor: pointer;
-}
-
-.select:hover {
-  border-color: var(--ink);
 }
 
 .options {
@@ -317,9 +368,6 @@ a {
 
 .option__note {
   grid-column: 1;
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
-  line-height: 1.5;
 }
 
 /* チェックボックスをスイッチの形にする（中身は本物の checkbox） */
@@ -375,35 +423,19 @@ a {
   border-bottom: 1px solid var(--rule);
 }
 
-.slip__title {
-  margin: 0;
-  font-size: var(--fs-l);
-  font-weight: 700;
-}
 
 .period {
   display: inline-flex;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius);
 }
 
-.period button {
-  min-height: 2.5rem;
-  padding: 0 1rem;
-  border: 0;
-  background: transparent;
-  font-size: var(--fs-s);
-  font-weight: 700;
-  cursor: pointer;
-}
-
+/* 2つのボタンを1つの部品に見せる。間の枠線は重ねる */
 .period button + button {
-  border-left: 1px solid var(--ink);
+  margin-left: -1px;
 }
 
+.period button:hover,
 .period button[aria-pressed='true'] {
-  background: var(--ink);
-  color: #fff;
+  position: relative;
 }
 
 .net {
@@ -600,39 +632,11 @@ a {
   margin-top: -0.6rem; /* 明細の紙に付いている操作に見せる */
 }
 
-.action {
-  min-height: 2.5rem;
-  padding: 0 0.9rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper);
-  font-size: var(--fs-s);
-  cursor: pointer;
-}
-
-.action:hover {
-  border-color: var(--ink);
-}
-
 .actions__note {
   margin: 0;
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
 }
 
 /* ───────── データで書き出す ───────── */
-
-.export {
-  padding: 1rem 1.25rem 0.9rem;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-}
-
-.export__title {
-  margin: 0 0 0.6rem;
-  font-size: var(--fs-m);
-  font-weight: 700;
-}
 
 .export__list {
   display: grid;
@@ -651,20 +655,12 @@ a {
 
 .export__button {
   display: grid;
+  align-content: center;
   gap: 0.1rem;
   width: 100%;
-  min-height: 3.6rem;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper);
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
   text-align: left;
-  cursor: pointer;
-}
-
-.export__button:hover:not(:disabled) {
-  border-color: var(--ai);
-  background: var(--ai-tint);
 }
 
 .export__button:disabled {
@@ -684,14 +680,17 @@ a {
 .export__note {
   color: var(--ink-faint);
   font-size: var(--fs-xs);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .export__status {
   min-height: 1.5em;
-  margin: 0.6rem 0 0;
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
+  margin: 0.75rem 0 0;
+}
+
+.export__status:empty {
+  min-height: 0;
+  margin: 0;
 }
 
 .export__status--error {
@@ -700,23 +699,8 @@ a {
 
 /* ───────── 月給を変えると（積み上げの図） ───────── */
 
-.curve {
-  padding: 1.25rem 1.25rem 1rem;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-}
-
-.curve__title {
-  margin: 0;
-  font-size: var(--fs-l);
-  font-weight: 700;
-}
-
 .curve__lead {
   max-width: 44em;
-  margin: 0.25rem 0 0.75rem;
-  color: var(--ink-soft);
-  font-size: var(--fs-s);
 }
 
 .curve__figure {
@@ -874,8 +858,6 @@ a {
 
 .curve__caption {
   margin-top: 0.5rem;
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
 }
 
 @media (max-width: 640px) {
@@ -898,24 +880,6 @@ a {
 }
 
 /* ───────── 会社の負担 ───────── */
-
-.employer {
-  padding: 1.25rem;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-}
-
-.employer__title {
-  margin: 0;
-  font-size: var(--fs-l);
-  font-weight: 700;
-}
-
-.employer__lead {
-  margin: 0.25rem 0 1rem;
-  color: var(--ink-soft);
-  font-size: var(--fs-s);
-}
 
 .equation {
   display: flex;

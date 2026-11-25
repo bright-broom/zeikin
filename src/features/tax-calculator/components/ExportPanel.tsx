@@ -57,13 +57,14 @@ export const ExportPanel = memo(({ input, result }: ExportPanelProps) => {
         ? status.message
         : status.kind === 'failed'
           ? texts.exporting.status.failed
-          : texts.exporting.lead;
+          : '';
 
   return (
     <section className="export" aria-labelledby="export-title">
       <h2 className="export__title" id="export-title">
         {texts.exporting.heading}
       </h2>
+      <p className="export__lead">{texts.exporting.lead}</p>
       <ul className="export__list">
         {ORDER.map((format) => {
           const f = texts.exporting.formats[format];
