@@ -15,7 +15,7 @@ export const toMarkdown = (doc: ExportDocument): string => {
   const lines: string[] = [
     `## ${texts.exporting.title}`,
     '',
-    `**${texts.exporting.takeHome}**：月 ${yen(s.takeHome.monthly)}円 ／ 年 ${yen(s.takeHome.annual)}円（${texts.slip.seal} ${s.takeHomeRate.annual.toFixed(1)}%）`,
+    `**${texts.exporting.takeHome}**：月 ${yen(s.takeHome.monthly)}円 ／ 年 ${yen(s.takeHome.annual)}円（${texts.slip.rate} ${s.takeHomeRate.annual.toFixed(1)}%）`,
     '',
     ...describeConditions(doc).map(([k, v]) => `- ${escapeMarkdownCell(k)}：${escapeMarkdownCell(v)}`),
     '',

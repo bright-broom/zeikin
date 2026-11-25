@@ -3,7 +3,6 @@ import type { CSSProperties } from 'react';
 import type { MonthlyAnnual, TaxCalculationResult } from '@domain/tax';
 import { texts } from '@constants';
 import { formatYen as yen } from '@utils';
-import { useTween } from '../hooks/useTween';
 
 export type Period = keyof MonthlyAnnual;
 
@@ -35,9 +34,6 @@ export const PaySlip = memo(({ result, period: p, onPeriodChange }: PaySlipProps
   const insurance = e.totalTax[p] - tax;
   const rate = gross > 0 ? Math.round((takeHome / gross) * 1000) / 10 : 0;
   const share = (v: number) => (gross > 0 ? (v / gross) * 100 : 0);
-  // 見た目の数字だけを動かす。読み上げは動き終わった値（下の sr-only）を使う
-  const shownTakeHome = useTween(takeHome);
-  const shownRate = useTween(rate);
 
   const segments = [
     { key: 'takeHome', label: texts.slip.split.takeHome, value: takeHome, color: COLOR.takeHome },
@@ -71,22 +67,14 @@ export const PaySlip = memo(({ result, period: p, onPeriodChange }: PaySlipProps
       <div className="net">
         <div>
           <p className="net__label">{texts.slip.net}</p>
-          <p className="net__amount">
-            <span aria-hidden="true">{yen(shownTakeHome)}</span>
-            <span className="sr-only" aria-live="polite">
-              {yen(takeHome)}
-            </span>
+          <p className="net__amount" aria-live="polite">
+            {yen(takeHome)}
             <span className="net__yen">{texts.currency.yen}</span>
           </p>
           <p className="net__sub">{texts.slip.netSub[p](yen(gross))}</p>
-        </div>
-        <div className="seal" aria-label={`${texts.slip.seal} ${rate}%`}>
-          <span className="seal__label" aria-hidden="true">
-            {texts.slip.seal}
-          </span>
-          <span className="seal__value" aria-hidden="true">
-            {shownRate.toFixed(1)}%
-          </span>
+          <p className="net__rate">
+            {texts.slip.rate} <span className="num">{rate.toFixed(1)}%</span>
+          </p>
         </div>
       </div>
 

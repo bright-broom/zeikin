@@ -44,7 +44,7 @@ export const texts = {
       monthly: (gross: string) => `額面 ${gross}円（賞与のない月）`,
       annual: (gross: string) => `額面 ${gross}円（賞与を含む1年分）`,
     },
-    seal: '手取り率',
+    rate: '手取り率',
     split: {
       takeHome: '手取り',
       tax: '税金',
