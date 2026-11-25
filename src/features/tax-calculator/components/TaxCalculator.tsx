@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { calculatePay, TAX_YEAR_LABEL } from '@domain/tax';
+import { calculatePay, MAN, TAX_YEAR_LABEL } from '@domain/tax';
 import type { TaxCalculationInput, TaxCalculationResult } from '@domain/tax';
 import { texts } from '@constants';
 import { formatYen as yen } from '@utils';
@@ -14,7 +14,6 @@ import { Actions } from './Actions';
 import { ExportPanel } from './ExportPanel';
 import { readInputsFromUrl, useSyncInputsToUrl } from '../hooks/useUrlState';
 
-const MAN = 10_000;
 const MAX_SALARY_MAN = 10_000; // 月1億円。これより上は入力の打ち間違いとみなす
 const MAX_BONUS_MAN = 100_000;
 

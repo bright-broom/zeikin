@@ -145,6 +145,30 @@ describe('月給50万円・大阪府・40〜64歳・賞与120万円（手計算�
   });
 });
 
+describe('月給41万円・東京都・40歳未満・賞与なし（別に作った検算と照合。折半で 1円の差が出る例）', () => {
+  const e = calculatePay({ ...base, monthlySalary: 410_000, isCareInsured: false }).employee;
+  it('控除額', () => {
+    expect(e.healthInsurance.monthly).toBe(20_192); // 410,000×9.85%＝40,385 の半分 20,192.5 → 切り捨て
+    expect(e.childSupport?.monthly).toBe(471); // 943 の半分 471.5 → 切り捨て
+    expect(e.pensionInsurance?.monthly).toBe(37_515);
+    expect(e.employmentInsurance.monthly).toBe(2_050);
+    expect(e.incomeTax.annual).toBe(88_400);
+    expect(e.residentTax.annual).toBe(236_700);
+    expect(e.residentTax.monthly).toBe(19_700);
+    expect(e.takeHome.annual).toBe(3_872_164);
+  });
+});
+
+describe('月給50万円・大阪府の税（別に作った検算と照合）', () => {
+  const e = calculatePay({ ...base, monthlySalary: 500_000, annualBonus: 1_200_000, prefecture: '大阪府' }).employee;
+  it('所得税・住民税・手取り（年）', () => {
+    expect(e.incomeTax.annual).toBe(295_100);
+    expect(e.residentTax.annual).toBe(384_700);
+    expect(e.residentTax.monthly).toBe(32_000);
+    expect(e.takeHome.annual).toBe(5_394_120);
+  });
+});
+
 describe('料率の表の形（書き間違いを見つける）', () => {
   it('健康保険料率は 47都道府県あり、9〜11% に収まる', () => {
     expect(PREFECTURES).toHaveLength(47);

@@ -1,5 +1,6 @@
 import { memo, useMemo, useState } from 'react';
 import type { CSSProperties, MouseEvent } from 'react';
+import { MAN, takeHomeRate } from '@domain/tax';
 import type { Prefecture } from '@domain/tax';
 import { texts } from '@constants';
 import { formatYen as yen } from '@utils';
@@ -21,7 +22,6 @@ const H = 318;
 const PAD = { left: 52, right: 14, top: 34, bottom: 52 };
 const PLOT_W = W - PAD.left - PAD.right;
 const PLOT_H = H - PAD.top - PAD.bottom;
-const MAN = 10_000;
 
 // 明細の内訳と同じ 3 色・同じ順番で、下から積み上げる
 const BANDS = [
@@ -72,7 +72,7 @@ export const Curve = memo(({ salary, annualBonus, prefecture, hasSocialInsurance
     return points.reduce((a, b) => (Math.abs(b.salary - s) < Math.abs(a.salary - s) ? b : a));
   };
 
-  const rate = shown.gross > 0 ? Math.round((shown.takeHome / shown.gross) * 1000) / 10 : 0;
+  const rate = takeHomeRate(shown.takeHome, shown.gross);
   const tipLeft = ((x(shown.salary) / W) * 100).toFixed(2);
 
   return (

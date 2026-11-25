@@ -1,5 +1,5 @@
 import type { MonthlyAnnual, TaxCalculationInput, TaxCalculationResult } from '@domain/tax';
-import { TAX_YEAR_LABEL } from '@domain/tax';
+import { takeHomeRate, TAX_YEAR_LABEL } from '@domain/tax';
 import { texts } from '@constants';
 
 /**
@@ -55,7 +55,6 @@ export const SECTION_LABEL: Record<SectionKey, string> = {
   employer: texts.exporting.sectionEmployer,
 };
 
-const rate = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 1000) / 10 : 0);
 
 const row = (
   section: SectionKey,
@@ -121,8 +120,8 @@ export const buildExportDocument = (
       totalDeductions: { ...e.totalTax },
       takeHome: { ...e.takeHome },
       takeHomeRate: {
-        monthly: rate(e.takeHome.monthly, e.grossIncome.monthly),
-        annual: rate(e.takeHome.annual, e.grossIncome.annual),
+        monthly: takeHomeRate(e.takeHome.monthly, e.grossIncome.monthly),
+        annual: takeHomeRate(e.takeHome.annual, e.grossIncome.annual),
       },
       employerBurden: { ...r.total },
       employerTotalCost: {
