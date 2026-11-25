@@ -1,7 +1,5 @@
-import { calculatePay } from '@domain/tax';
+import { calculatePay, MAN, splitDeductions } from '@domain/tax';
 import type { TaxCalculationInput } from '@domain/tax';
-
-const MAN = 10_000;
 
 export interface CurvePoint {
   /** 月給（万円） */
@@ -25,13 +23,11 @@ type BaseInput = Omit<TaxCalculationInput, 'monthlySalary'>;
 
 const pointAt = (salary: number, base: BaseInput): CurvePoint => {
   const e = calculatePay({ ...base, monthlySalary: salary * MAN }).employee;
-  const tax = e.incomeTax.monthly + e.residentTax.monthly;
   return {
     salary,
     gross: e.grossIncome.monthly,
     takeHome: e.takeHome.monthly,
-    tax,
-    insurance: e.totalTax.monthly - tax,
+    ...splitDeductions(e, 'monthly'),
     pension: e.pensionInsurance?.monthly ?? 0,
   };
 };

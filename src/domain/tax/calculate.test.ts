@@ -1,13 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import {
-  basicDeduction,
-  calculatePay,
-  incomeTaxFor,
-  residentTaxFor,
-  roundEmployeeShare,
-  salaryIncome,
-  standardMonthly,
-} from './calculate';
+import { calculatePay } from './calculate';
+import { basicDeduction, incomeTaxFor, salaryIncome } from './income-tax';
+import { standardMonthly } from './premiums';
+import { residentTaxFor } from './resident-tax';
+import { roundEmployeeShare } from './rounding';
 
 const base = { annualBonus: 0, hasSocialInsurance: true, isCareInsured: false, prefecture: '東京都' as const };
 

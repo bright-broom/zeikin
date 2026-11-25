@@ -12,12 +12,6 @@ import type { MonthlyAnnual, TaxCalculationInput, TaxCalculationResult } from '.
  *   4. 手取り ＝ 額面 − 本人の保険料 − 所得税 − 住民税。会社の負担はここに入らない
  */
 
-// 以前はこのファイルにあった関数。テストやほかのコードから同じ名前で使えるように残す
-export { roundEmployeeShare } from './rounding';
-export { standardMonthly } from './premiums';
-export { basicDeduction, incomeTaxFor, salaryIncome } from './income-tax';
-export { residentTaxFor } from './resident-tax';
-
 const ma = (monthly: number, annual: number): MonthlyAnnual => ({ monthly, annual });
 
 export const calculatePay = (input: TaxCalculationInput): TaxCalculationResult => {

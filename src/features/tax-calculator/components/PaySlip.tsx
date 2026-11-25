@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import type { CSSProperties } from 'react';
+import { splitDeductions, takeHomeRate } from '@domain/tax';
 import type { MonthlyAnnual, TaxCalculationResult } from '@domain/tax';
 import { texts } from '@constants';
 import { formatYen as yen } from '@utils';
@@ -30,9 +31,8 @@ export const PaySlip = memo(({ result, period: p, onPeriodChange }: PaySlipProps
   const e = result.employee;
   const gross = e.grossIncome[p];
   const takeHome = e.takeHome[p];
-  const tax = e.incomeTax[p] + e.residentTax[p];
-  const insurance = e.totalTax[p] - tax;
-  const rate = gross > 0 ? Math.round((takeHome / gross) * 1000) / 10 : 0;
+  const { tax, insurance } = splitDeductions(e, p);
+  const rate = takeHomeRate(takeHome, gross);
   const share = (v: number) => (gross > 0 ? (v / gross) * 100 : 0);
 
   const segments = [

@@ -42,6 +42,7 @@ src/
     income-tax.ts       所得税（給与所得控除・基礎控除・速算表）
     resident-tax.ts     住民税
     rounding.ts         端数処理
+    summary.ts          手取り率と、控除を税金・社会保険に分ける関数（画面・図・書き出しで共通）
     calculate.ts        上の 4つを順に呼んで、明細の形にまとめる入口
     calculate.test.ts   手計算と照らし合わせたテスト
     premiums.test.ts    負担の分け方の決まり（折半・会社のみ・合計＝項目の足し算）をどの条件でも確かめる
