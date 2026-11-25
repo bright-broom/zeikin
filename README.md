@@ -38,8 +38,14 @@ Cloudflare Pages で公開しています。`main` に入ると自動でビル�
 src/
   domain/tax/
     rates.ts            税率・保険料率（年度が変わったらここだけ直す）
-    calculate.ts        計算（画面に依存しない関数）
+    premiums.ts         保険料。どの保険料をだれが払うかの表（PREMIUMS）と、本人・会社への分け方
+    income-tax.ts       所得税（給与所得控除・基礎控除・速算表）
+    resident-tax.ts     住民税
+    rounding.ts         端数処理
+    calculate.ts        上の 4つを順に呼んで、明細の形にまとめる入口
     calculate.test.ts   手計算と照らし合わせたテスト
+    premiums.test.ts    負担の分け方の決まり（折半・会社のみ・合計＝項目の足し算）をどの条件でも確かめる
+    regression.test.ts  約 9万通りの条件で、結果が意図せず変わっていないかの見張り
   features/tax-calculator/export/
     model.ts            書き出しの中身（全形式の元）
     csv.ts / xlsx.ts / json.ts / markdown.ts   各形式への変換
@@ -55,7 +61,7 @@ src/
 
 ## 料率の更新
 
-毎年 3〜4月に協会けんぽの健康保険料率・介護保険料率と雇用保険料率が、12月の年末調整前後に所得税の控除額が変わることがあります。`src/domain/tax/rates.ts` を直し、`calculate.test.ts` の期待値を手計算で作り直してください。
+毎年 3〜4月に協会けんぽの健康保険料率・介護保険料率と雇用保険料率が、12月の年末調整前後に所得税の控除額が変わることがあります。`src/domain/tax/rates.ts` を直し、`calculate.test.ts`・`premiums.test.ts` の期待値を手計算で作り直してください。`regression.test.ts` の値は、変わった理由を説明できることを確かめてから直します。保険料を足すときは `premiums.ts` の `PREMIUMS` に 1行足すだけで、合計にも入ります。
 
 ## ライセンス
 
